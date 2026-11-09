@@ -1,0 +1,19 @@
+export const STORAGE_KEYS = {
+  GRANT_DETAILS: 'opensats_grant_details',
+  REPORT_DRAFT: 'opensats_report_draft',
+  GRANT_ID: 'opensats_grant_id',
+  REPORT_ID: 'opensats_report_id',
+  REPORT_CONTENT: 'opensats_report_content',
+} as const
+
+export const ERROR_MESSAGES = {
+  GRANT_ID_REQUIRED: 'Grant ID is required',
+  GRANT_ID_INVALID:
+    'A valid Grant ID is required to start the submission process',
+  GRANT_NOT_FOUND: 'Grant not found, contact support for assistance',
+  PAST_GRANT:
+    'This is a past grant that already ended. Please use your new grant number.',
+}
+
+export const MONTHLY_DONATION_URL =
+  'https://adtjkuks.donorsupport.co/page/opensats'

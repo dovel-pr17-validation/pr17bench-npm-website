@@ -1,0 +1,377 @@
+import Head from 'next/head'
+import { blogOgImagePath, isLocalImage } from '@/utils/blogOgImages'
+import { useRouter } from 'next/router'
+import siteMetadata from '@/data/siteMetadata'
+import { CoreContent } from 'pliny/utils/contentlayer'
+import type { Blog, Authors } from 'contentlayer/generated'
+interface CommonSEOProps {
+  title: string
+  description: string
+  ogType: string
+  ogImage:
+    | string
+    | {
+        '@type': string
+        url: string
+      }[]
+  twImage: string
+  canonicalUrl?: string
+}
+
+const CommonSEO = ({
+  title,
+  description,
+  ogType,
+  ogImage,
+  twImage,
+  canonicalUrl,
+}: CommonSEOProps) => {
+  const router = useRouter()
+  return (
+    <Head>
+      <title>{title}</title>
+      <meta name="robots" content="follow, index" />
+      <meta name="description" content={description} />
+      <meta
+        property="og:url"
+        content={`${siteMetadata.siteUrl}${router.asPath}`}
+      />
+      <meta property="og:type" content={ogType} />
+      <meta property="og:site_name" content={siteMetadata.title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:title" content={title} />
+      {(Array.isArray(ogImage)
+        ? ogImage.map(({ url }) => url)
+        : [ogImage]
+      ).flatMap((url, index) => [
+        <meta property="og:image" content={url} key={`og-image-${index}`} />,
+        ...(url.startsWith(`${siteMetadata.siteUrl}/`)
+          ? [
+              <meta
+                property="og:image:width"
+                content="1200"
+                key={`og-width-${index}`}
+              />,
+              <meta
+                property="og:image:height"
+                content="630"
+                key={`og-height-${index}`}
+              />,
+              <meta
+                property="og:image:type"
+                content={url.endsWith('.jpg') ? 'image/jpeg' : 'image/png'}
+                key={`og-type-${index}`}
+              />,
+            ]
+          : []),
+      ])}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:site" content={siteMetadata.twitter} />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={twImage} />
+      <link
+        rel="canonical"
+        href={
+          canonicalUrl
+            ? canonicalUrl
+            : `${siteMetadata.siteUrl}${router.asPath}`
+        }
+      />
+    </Head>
+  )
+}
+
+interface PageSEOProps {
+  title: string
+  description: string
+  slug?: string
+}
+
+interface ProjectSEOProps {
+  title: string
+  description: string
+  slug: string
+}
+
+// Utility / legal / form-result pages that don't get a custom social
+// card and fall back to the default brand OG. Keep this list in sync
+// with SKIP_SLUGS in scripts/generate-page-og.mjs.
+const PAGES_WITHOUT_OG = new Set([
+  'canary',
+  'pgp',
+  'privacy',
+  'report-success',
+  'submitted',
+  'terms',
+  'thankyou',
+])
+
+export const PageSEO = ({ title, description, slug }: PageSEOProps) => {
+  const hasCustomOg = slug ? !PAGES_WITHOUT_OG.has(slug) : false
+  const ogImagePath = hasCustomOg
+    ? `/static/images/pages/og/${slug}.png`
+    : siteMetadata.socialBanner
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+  const twImageUrl = ogImageUrl
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType="website"
+      ogImage={ogImageUrl}
+      twImage={twImageUrl}
+    />
+  )
+}
+
+export const ProjectSEO = ({ title, description, slug }: ProjectSEOProps) => {
+  const ogImagePath = `/static/images/projects/og/${slug}.png`
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType="website"
+      ogImage={ogImageUrl}
+      twImage={ogImageUrl}
+    />
+  )
+}
+
+export const FundSEO = ({ title, description, slug }: ProjectSEOProps) => {
+  const ogImagePath = `/static/images/funds/og/${slug}.png`
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType="website"
+      ogImage={ogImageUrl}
+      twImage={ogImageUrl}
+    />
+  )
+}
+
+// Authors who don't get a custom OG card and fall back to the default
+// brand image. Keep this list in sync with SKIP_SLUGS in
+// scripts/generate-author-og.mjs.
+const AUTHORS_WITHOUT_OG = new Set([
+  'bayer',
+  'cfunk',
+  'dtonon',
+  'ecurrencyhodler',
+  'jason',
+  'julian',
+  'lorenzo',
+  'niftynei',
+])
+
+export const AuthorSEO = ({ title, description, slug }: ProjectSEOProps) => {
+  const hasCustomOg = !AUTHORS_WITHOUT_OG.has(slug)
+  const ogImagePath = hasCustomOg
+    ? `/static/images/authors/og/${slug}.png`
+    : siteMetadata.socialBanner
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType="profile"
+      ogImage={ogImageUrl}
+      twImage={ogImageUrl}
+    />
+  )
+}
+
+interface TopicSEOProps {
+  title: string
+  description: string
+  slug?: string
+  ogType?: string
+}
+
+export const TopicSEO = ({
+  title,
+  description,
+  slug,
+  ogType = 'website',
+}: TopicSEOProps) => {
+  const ogImagePath = slug
+    ? `/static/images/topics/og/${slug}.png`
+    : `/static/images/topics/og/index.png`
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType={ogType}
+      ogImage={ogImageUrl}
+      twImage={ogImageUrl}
+    />
+  )
+}
+
+interface NewsletterSEOProps {
+  title: string
+  description: string
+  slug?: string
+  ogType?: string
+}
+
+export const NewsletterSEO = ({
+  title,
+  description,
+  slug,
+  ogType = 'website',
+}: NewsletterSEOProps) => {
+  const ogImagePath = slug
+    ? `/static/images/newsletter/og/${slug}.png`
+    : `/static/images/newsletter/og/index.png`
+  const ogImageUrl = siteMetadata.siteUrl + ogImagePath
+
+  return (
+    <CommonSEO
+      title={title}
+      description={description}
+      ogType={ogType}
+      ogImage={ogImageUrl}
+      twImage={ogImageUrl}
+    />
+  )
+}
+
+export const TagSEO = ({ title, description }: PageSEOProps) => {
+  const ogImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
+  const twImageUrl = siteMetadata.siteUrl + siteMetadata.socialBanner
+  const router = useRouter()
+  return (
+    <>
+      <CommonSEO
+        title={title}
+        description={description}
+        ogType="website"
+        ogImage={ogImageUrl}
+        twImage={twImageUrl}
+      />
+      <Head>
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title={`${description} - RSS feed`}
+          href={`${siteMetadata.siteUrl}${router.asPath}/feed.xml`}
+        />
+      </Head>
+    </>
+  )
+}
+
+interface BlogSeoProps extends CoreContent<Blog> {
+  authorDetails?: CoreContent<Authors>[]
+  url: string
+}
+
+export const BlogSEO = ({
+  authorDetails,
+  title,
+  summary,
+  date,
+  lastmod,
+  url,
+  images = [],
+  canonicalUrl,
+  slug,
+}: BlogSeoProps) => {
+  const publishedAt = new Date(date).toISOString()
+  const modifiedAt = new Date(lastmod || date).toISOString()
+  const imagesArr =
+    images.length === 0
+      ? [siteMetadata.socialBanner]
+      : typeof images === 'string'
+      ? [images]
+      : images
+
+  const featuredImages = imagesArr.map((img, index) => {
+    const socialImage =
+      img !== siteMetadata.socialBanner && isLocalImage(img)
+        ? blogOgImagePath(slug, index)
+        : img
+    return {
+      '@type': 'ImageObject',
+      url: isLocalImage(socialImage)
+        ? siteMetadata.siteUrl + socialImage
+        : socialImage,
+    }
+  })
+
+  let authorList
+  if (authorDetails) {
+    authorList = authorDetails.map((author) => {
+      return {
+        '@type': 'Person',
+        name: author.name,
+      }
+    })
+  } else {
+    authorList = {
+      '@type': 'Person',
+      name: siteMetadata.author,
+    }
+  }
+
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+    headline: title,
+    image: featuredImages,
+    datePublished: publishedAt,
+    dateModified: modifiedAt,
+    author: authorList,
+    publisher: {
+      '@type': 'Organization',
+      name: siteMetadata.author,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteMetadata.siteUrl}${siteMetadata.siteLogo}`,
+      },
+    },
+    description: summary,
+  }
+
+  const twImageUrl = featuredImages[0].url
+
+  return (
+    <>
+      <CommonSEO
+        title={title}
+        description={summary}
+        ogType="article"
+        ogImage={featuredImages}
+        twImage={twImageUrl}
+        canonicalUrl={canonicalUrl}
+      />
+      <Head>
+        {date && (
+          <meta property="article:published_time" content={publishedAt} />
+        )}
+        {lastmod && (
+          <meta property="article:modified_time" content={modifiedAt} />
+        )}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData, null, 2),
+          }}
+        />
+      </Head>
+    </>
+  )
+}

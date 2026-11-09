@@ -1,0 +1,816 @@
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Inter/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/Inter/Inter-Italic-VariableFont_opsz,wght.ttf')
+    format('truetype');
+}
+
+button.small {
+  @apply border border-black bg-white p-1 text-sm text-black;
+}
+
+button.group {
+  @apply border border-black bg-white p-2 text-sm text-black;
+}
+
+button.pay {
+  @apply flex min-w-[20rem] flex-1 justify-start gap-4 rounded rounded-xl border border-2 border-black border-orange-500 bg-transparent bg-white p-8 text-xl font-semibold text-orange-500 hover:border-transparent hover:bg-orange-500 hover:text-white;
+}
+
+button.pay:disabled {
+  @apply border-gray-400 bg-gray-100 text-gray-400 hover:shadow-none;
+}
+
+input[type='checkbox'] {
+  @apply mr-2;
+}
+
+body {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+html.ReactModal__Html--open,
+body.ReactModal__Body--open {
+  overflow: hidden;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Editor's note                                                      */
+/* A minimal "letter" treatment for the opening note in newsletter    */
+/* issues: serif body, thin orange margin rule, soft cream backdrop,  */
+/* italic sign-off.                                                   */
+/* ------------------------------------------------------------------ */
+
+.editors-note {
+  margin: 0 0 2.5rem;
+  padding: 1.75rem 2rem;
+  background-color: #fffaf3; /* warm off-white */
+  border-left: 3px solid #fdba74; /* orange-300 */
+  border-radius: 2px;
+  font-family: ui-serif, Georgia, 'Times New Roman', Times, serif;
+}
+
+.editors-note p {
+  font-family: inherit;
+}
+
+.editors-note__signoff {
+  font-style: italic;
+  text-align: right;
+}
+
+.dark .editors-note {
+  background-color: rgba(120, 53, 15, 0.12); /* faint warm tint */
+  border-left-color: #c2410c; /* orange-700 */
+}
+
+@media (max-width: 480px) {
+  .editors-note {
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding: 1.25rem 1rem;
+    border-radius: 0;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Newsletter prose: tighter list indents on mobile                   */
+/* prose-lg defaults give ul/ol ~1.625em of inline-start padding plus */
+/* a marker offset; on narrow screens that eats the column. Pull the  */
+/* indent in and shrink the marker so bullets sit closer to the text. */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 640px) {
+  .newsletter-prose ul,
+  .newsletter-prose ol {
+    padding-inline-start: 1em;
+  }
+
+  .newsletter-prose li {
+    padding-inline-start: 0.25em;
+  }
+
+  .newsletter-prose li::marker {
+    font-size: 0.9em;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* DonateRecurringButtonV2                                            */
+/* A wide split-text banner with an angled orange wedge that grows on */
+/* hover, fading in floating hearts. Inspired by Thunderbird's EOY    */
+/* donate banner.                                                     */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Outer shell: full-row flex center inside Tailwind Typography (.prose),
+ * matching what <center> used to give without affecting body text flow.
+ */
+.donate-banner-v2-shell {
+  margin-block: 4rem;
+}
+
+.donate-banner-v2 {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: min(480px, 100%);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 120px;
+  margin: 0;
+  border-radius: 6px;
+  isolation: isolate;
+  background-color: #f4f4f5; /* neutral-100 */
+  background-image: linear-gradient(to right, #ffedd5, #f4f4f5);
+  box-shadow: 4px 4px 24px rgba(0, 0, 0, 0.15);
+  color: white;
+  text-decoration: none !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out;
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+
+.donate-banner-v2::after {
+  content: '';
+  position: absolute;
+  top: -210px;
+  left: -240px;
+  height: 420px;
+  width: 420px;
+  background-color: #ea580c; /* orange-600 */
+  background-image: linear-gradient(#f97316, #c2410c); /* orange-500 -> orange-700 */
+  /* Slight scale hides subpixel gaps vs border-radius clipping (esp. Mobile Safari). */
+  transform: rotate(36deg) scale(1.03);
+  transform-origin: center;
+  transition: transform 0.3s ease-in-out;
+  backface-visibility: hidden;
+  z-index: 0;
+}
+
+.donate-banner-v2__left,
+.donate-banner-v2__right {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+  z-index: 2;
+  overflow-wrap: break-word;
+}
+
+.donate-banner-v2__left {
+  color: white;
+}
+
+.donate-banner-v2__left strong {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.15;
+}
+
+.donate-banner-v2__right {
+  text-align: right;
+  color: #9a3412; /* orange-800 */
+  text-shadow: 0 0 4px #f4f4f5, 0 1px 1px #f4f4f5;
+}
+
+.donate-banner-v2__right strong {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #9a3412;
+  line-height: 1.2;
+}
+
+.donate-banner-v2__hearts {
+  position: absolute;
+  inset-block-end: 0.5rem;
+  inset-inline-end: 0.75rem;
+  display: none;
+  align-items: end;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.donate-banner-v2__hearts > span {
+  display: inline-flex;
+  opacity: 0;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.donate-banner-v2__hearts > span:nth-child(2) {
+  font-size: 2.5rem;
+  transform: translateY(-6px);
+}
+
+.donate-banner-v2:hover {
+  transform: scale(1.05);
+}
+
+.donate-banner-v2:hover::after {
+  transform: rotate(36deg) scale(3);
+}
+
+.donate-banner-v2:hover .donate-banner-v2__right {
+  opacity: 0;
+}
+
+.donate-banner-v2:hover .donate-banner-v2__left {
+  transform: translate(20px, 4px);
+}
+
+.donate-banner-v2:hover .donate-banner-v2__hearts {
+  display: flex;
+}
+
+.donate-banner-v2:hover .donate-banner-v2__hearts > span {
+  animation: donate-banner-v2-heart-fade 1s forwards ease-in-out;
+}
+
+.donate-banner-v2:hover .donate-banner-v2__hearts > span:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.donate-banner-v2:hover .donate-banner-v2__hearts > span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes donate-banner-v2-heart-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.donate-banner-v2:hover .donate-banner-v2__hearts > span:nth-child(2) {
+  animation: donate-banner-v2-heart-fade-mid 1s forwards ease-in-out;
+}
+
+@keyframes donate-banner-v2-heart-fade-mid {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .donate-banner-v2,
+  .donate-banner-v2::after,
+  .donate-banner-v2__left,
+  .donate-banner-v2__right,
+  .donate-banner-v2__hearts > span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.dark .donate-banner-v2 {
+  background-color: #27272a; /* neutral-800 */
+  background-image: linear-gradient(
+    to right,
+    #431407,
+    #27272a
+  ); /* orange-950 -> neutral-800 */
+  box-shadow: 4px 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dark .donate-banner-v2__right,
+.dark .donate-banner-v2__right strong {
+  color: #fdba74; /* orange-300 */
+  text-shadow: 0 0 4px #1c1917, 0 1px 1px #1c1917;
+}
+
+/* Purple variant — used for the Nostr fund. Mirrors the orange variant   */
+/* but swaps the gradient, wedge, and accent text to brand-kit purples.   */
+.donate-banner-v2--purple {
+  background-image: linear-gradient(
+    to right,
+    #f3e8ff,
+    #f4f4f5
+  ); /* purple-100 -> neutral-100 */
+}
+
+.donate-banner-v2--purple::after {
+  background-color: #9333ea; /* purple-600 */
+  background-image: linear-gradient(
+    #a855f7,
+    #7e22ce
+  ); /* purple-500 -> purple-700 */
+}
+
+.donate-banner-v2--purple .donate-banner-v2__right,
+.donate-banner-v2--purple .donate-banner-v2__right strong {
+  color: #6b21a8; /* purple-800 */
+}
+
+.dark .donate-banner-v2--purple {
+  background-image: linear-gradient(
+    to right,
+    #3b0764,
+    #27272a
+  ); /* purple-950 -> neutral-800 */
+}
+
+.dark .donate-banner-v2--purple .donate-banner-v2__right,
+.dark .donate-banner-v2--purple .donate-banner-v2__right strong {
+  color: #d8b4fe; /* purple-300 */
+}
+
+/* Red variant — used for the Red Team Fund. Mirrors orange/purple */
+/* with brand-kit reds matching the apply-banner-v2--red treatment.    */
+.donate-banner-v2--red {
+  background-image: linear-gradient(
+    to right,
+    #fee2e2,
+    #f4f4f5
+  ); /* red-100 -> neutral-100 */
+}
+
+.donate-banner-v2--red::after {
+  background-color: #dc2626; /* red-600 */
+  background-image: linear-gradient(
+    #ef4444,
+    #b91c1c
+  ); /* red-500 -> red-700 */
+}
+
+.donate-banner-v2--red .donate-banner-v2__right,
+.donate-banner-v2--red .donate-banner-v2__right strong {
+  color: #991b1b; /* red-800 */
+}
+
+.dark .donate-banner-v2--red {
+  background-image: linear-gradient(
+    to right,
+    #450a0a,
+    #27272a
+  ); /* red-950 -> neutral-800 */
+}
+
+.dark .donate-banner-v2--red .donate-banner-v2__right,
+.dark .donate-banner-v2--red .donate-banner-v2__right strong {
+  color: #fca5a5; /* red-300 */
+}
+
+.donate-banner-v2__tagline-mobile {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .donate-banner-v2 {
+    align-items: center;
+    min-height: 96px;
+  }
+
+  /* Keep the painted wedge left of the mobile CTA copy (two narrow columns). */
+  .donate-banner-v2::after {
+    left: -305px;
+    top: -218px;
+    transform: rotate(32deg) scale(1.06);
+  }
+
+  .donate-banner-v2:hover::after {
+    transform: rotate(32deg) scale(3);
+  }
+
+  .donate-banner-v2__prelude {
+    display: none;
+  }
+
+  .donate-banner-v2__left,
+  .donate-banner-v2__right {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .donate-banner-v2__left {
+    flex: 0 1 auto;
+    padding-right: 0.625rem;
+  }
+
+  .donate-banner-v2__right {
+    flex: 1 1 0;
+    padding-left: 0.625rem;
+  }
+
+  .donate-banner-v2__tagline {
+    display: none;
+  }
+
+  .donate-banner-v2__tagline-mobile {
+    display: inline;
+  }
+
+  .donate-banner-v2__left strong {
+    font-size: clamp(1.15rem, 4.3vw, 1.35rem);
+    white-space: nowrap;
+  }
+
+  .donate-banner-v2__right strong {
+    font-size: 1rem;
+  }
+
+  .donate-banner-v2__tagline-mobile-sub {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+    line-height: 1.15;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* ApplyButton banner                                                 */
+/* Mirrors the v2 donate banner so an apply-for-a-grant CTA can share */
+/* the same orange-gradient aesthetic with hover animation, dark-mode */
+/* support, and a mobile-optimized layout.                            */
+/* ------------------------------------------------------------------ */
+
+.apply-banner-v2 {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 480px;
+  min-height: 120px;
+  margin: 4rem auto;
+  border-radius: 6px;
+  background-color: #f4f4f5; /* neutral-100 */
+  background-image: linear-gradient(to right, #ffedd5, #f4f4f5);
+  box-shadow: 4px 4px 24px rgba(0, 0, 0, 0.15);
+  color: white;
+  text-decoration: none !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out;
+  font-size: 1.1rem;
+  line-height: 1.1;
+}
+
+.apply-banner-v2::after {
+  content: '';
+  position: absolute;
+  top: -210px;
+  left: -240px;
+  height: 420px;
+  width: 420px;
+  background-color: #ea580c; /* orange-600 */
+  background-image: linear-gradient(
+    #f97316,
+    #c2410c
+  ); /* orange-500 -> orange-700 */
+  transform: rotate(36deg);
+  transition: transform 0.3s ease-in-out;
+  z-index: 0;
+}
+
+.apply-banner-v2__left,
+.apply-banner-v2__right {
+  position: relative;
+  flex: 1;
+  padding: 1rem 1.25rem;
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+  z-index: 2;
+}
+
+.apply-banner-v2__left {
+  color: white;
+}
+
+.apply-banner-v2__left strong {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: white;
+}
+
+.apply-banner-v2__right {
+  text-align: right;
+  color: #9a3412; /* orange-800 */
+  text-shadow: 0 0 4px #f4f4f5, 0 1px 1px #f4f4f5;
+}
+
+.apply-banner-v2__right strong {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.apply-banner-v2__icons {
+  position: absolute;
+  inset-block-end: 0.5rem;
+  inset-inline-end: 0.75rem;
+  display: none;
+  align-items: end;
+  gap: 4px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.apply-banner-v2__icons > span {
+  display: inline-flex;
+  opacity: 0;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.apply-banner-v2__icons > span:nth-child(2) {
+  font-size: 2.5rem;
+  transform: translateY(-6px);
+}
+
+.apply-banner-v2:hover {
+  transform: scale(1.05);
+}
+
+.apply-banner-v2:hover::after {
+  transform: scale(3);
+}
+
+.apply-banner-v2:hover .apply-banner-v2__right {
+  opacity: 0;
+}
+
+.apply-banner-v2:hover .apply-banner-v2__left {
+  transform: translate(20px, 4px);
+}
+
+.apply-banner-v2:hover .apply-banner-v2__icons {
+  display: flex;
+}
+
+.apply-banner-v2:hover .apply-banner-v2__icons > span {
+  animation: apply-banner-v2-icon-fade 1s forwards ease-in-out;
+}
+
+.apply-banner-v2:hover .apply-banner-v2__icons > span:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.apply-banner-v2:hover .apply-banner-v2__icons > span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes apply-banner-v2-icon-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.apply-banner-v2:hover .apply-banner-v2__icons > span:nth-child(2) {
+  animation: apply-banner-v2-icon-fade-mid 1s forwards ease-in-out;
+}
+
+@keyframes apply-banner-v2-icon-fade-mid {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .apply-banner-v2,
+  .apply-banner-v2::after,
+  .apply-banner-v2__left,
+  .apply-banner-v2__right,
+  .apply-banner-v2__icons > span {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.dark .apply-banner-v2 {
+  background-color: #27272a; /* neutral-800 */
+  background-image: linear-gradient(
+    to right,
+    #431407,
+    #27272a
+  ); /* orange-950 -> neutral-800 */
+  box-shadow: 4px 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dark .apply-banner-v2__right,
+.dark .apply-banner-v2__right strong {
+  color: #fdba74; /* orange-300 */
+  text-shadow: 0 0 4px #1c1917, 0 1px 1px #1c1917;
+}
+
+.apply-banner-v2--red {
+  background-image: linear-gradient(to right, #fee2e2, #f4f4f5); /* red-100 */
+}
+
+.apply-banner-v2--red::after {
+  background-color: #dc2626; /* red-600 */
+  background-image: linear-gradient(
+    #ef4444,
+    #b91c1c
+  ); /* red-500 -> red-700 */
+}
+
+.apply-banner-v2--red .apply-banner-v2__right,
+.apply-banner-v2--red .apply-banner-v2__right strong {
+  color: #991b1b; /* red-800 */
+}
+
+.dark .apply-banner-v2--red {
+  background-image: linear-gradient(
+    to right,
+    #450a0a,
+    #27272a
+  ); /* red-950 -> neutral-800 */
+}
+
+.dark .apply-banner-v2--red .apply-banner-v2__right,
+.dark .apply-banner-v2--red .apply-banner-v2__right strong {
+  color: #fca5a5; /* red-300 */
+  text-shadow: 0 0 4px #1c1917, 0 1px 1px #1c1917;
+}
+
+.apply-banner-v2__tagline-mobile {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .apply-banner-v2 {
+    min-height: 88px;
+    margin: 3rem auto;
+  }
+
+  .apply-banner-v2__left,
+  .apply-banner-v2__right {
+    padding: 0.75rem 1rem;
+  }
+
+  .apply-banner-v2__left {
+    font-size: 0.95rem;
+  }
+
+  .apply-banner-v2__left strong {
+    font-size: 1.4rem;
+    white-space: nowrap;
+  }
+
+  .apply-banner-v2__tagline {
+    display: none;
+  }
+
+  .apply-banner-v2__tagline-mobile {
+    display: inline;
+  }
+
+  .apply-banner-v2__right strong {
+    font-size: 1.2rem;
+  }
+
+  .apply-banner-v2__tagline-mobile-sub {
+    display: block;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+}
+
+.site-theme--nostr {
+  --opensats-accent: #a855f7;
+  --opensats-logo-start: #a855f7;
+  --opensats-logo-end: #7e22ce;
+}
+
+.site-theme--nostr .text-primary-500 {
+  color: #9333ea;
+}
+
+.site-theme--nostr .hover\:text-primary-600:hover {
+  color: #7e22ce;
+}
+
+.site-theme--nostr .hover\:text-orange-500:hover {
+  color: #9333ea;
+}
+
+.site-theme--nostr .hover\:bg-primary-100:hover,
+.site-theme--nostr .bg-primary-100\/50 {
+  background-color: rgba(243, 232, 255, 0.7);
+}
+
+.site-theme--nostr .hover\:bg-orange-500:hover,
+.site-theme--nostr .dark\:hover\:bg-orange-500:hover {
+  background-color: #9333ea;
+}
+
+.site-theme--nostr .hover\:text-stone-800:hover,
+.site-theme--nostr .dark\:hover\:text-stone-800:hover {
+  color: #fff;
+}
+
+.site-theme--nostr .focus\:border-primary-500:focus {
+  border-color: #a855f7;
+}
+
+.site-theme--nostr .focus\:ring-primary-500:focus {
+  --tw-ring-color: rgb(168 85 247 / var(--tw-ring-opacity, 1));
+}
+
+.site-theme--nostr .prose a {
+  color: #9333ea;
+}
+
+.site-theme--nostr .prose a:hover {
+  color: #7e22ce !important;
+}
+
+.site-theme--nostr .prose a code {
+  color: #9333ea;
+}
+
+.nostr-section a,
+.nostr-section a code {
+  color: #9333ea;
+}
+
+.nostr-section a:hover {
+  color: #7e22ce !important;
+}
+
+.dark .site-theme--nostr .dark\:text-primary-400,
+.dark .site-theme--nostr .dark\:hover\:text-primary-400:hover,
+.dark .site-theme--nostr .dark\:hover\:text-primary-300:hover {
+  color: #d8b4fe;
+}
+
+.dark .site-theme--nostr .dark\:hover\:text-orange-400:hover {
+  color: #d8b4fe;
+}
+
+.dark .site-theme--nostr .dark\:hover\:bg-primary-900\/40:hover,
+.dark .site-theme--nostr .dark\:bg-primary-900\/20 {
+  background-color: rgba(59, 7, 100, 0.4);
+}
+
+.dark .site-theme--nostr .prose a,
+.dark .site-theme--nostr .prose a code {
+  color: #d8b4fe;
+}
+
+.dark .site-theme--nostr .prose a:hover {
+  color: #e9d5ff !important;
+}
+
+.dark .nostr-section a,
+.dark .nostr-section a code {
+  color: #d8b4fe;
+}
+
+.dark .nostr-section a:hover {
+  color: #e9d5ff !important;
+}

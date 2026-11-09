@@ -1,0 +1,219 @@
+import { NextApiRequest, NextApiResponse } from 'next/types'
+import { sendApplicationEmails } from '@/utils/application-emails'
+import { assertTurnstile, TURNSTILE_FAILURE_MESSAGE } from '@/utils/turnstile'
+import { areApplicationsOpen } from '@/utils/applicationWindow'
+import { isHttpUrl, isVideoRequired } from '@/utils/grantRules'
+import { formatUsdDisplay } from '@/utils/usd'
+import {
+  getApplicationIssueLabels,
+  getApplicationRepo,
+  normalizeMainFocus,
+} from '../../utils/application-routing'
+
+const GH_ACCESS_TOKEN = process.env.GH_ACCESS_TOKEN
+const GH_ORG = process.env.GH_ORG
+const GH_APP_REPO = process.env.GH_APP_REPO
+
+import { Octokit } from '@octokit/rest'
+const octokit = new Octokit({ auth: GH_ACCESS_TOKEN })
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method === 'POST') {
+    if (!req.body.RED && !areApplicationsOpen()) {
+      return res.status(403).json({
+        message: 'Grant applications are currently closed.',
+      })
+    }
+
+    if (!req.body.RED && req.body.ack_sanctions !== true) {
+      return res.status(400).json({
+        message: 'The sanctions acknowledgment is required.',
+      })
+    }
+
+    const videoLink =
+      typeof req.body.video_application === 'string'
+        ? req.body.video_application.trim()
+        : ''
+    if (isVideoRequired(req.body) && !videoLink) {
+      return res.status(400).json({
+        message: 'A video link is required.',
+      })
+    }
+    if (videoLink && !isHttpUrl(videoLink)) {
+      return res.status(400).json({
+        message: 'Enter a valid URL.',
+      })
+    }
+
+    const npub = typeof req.body.npub === 'string' ? req.body.npub.trim() : ''
+
+    if (!(await assertTurnstile(req))) {
+      return res.status(403).json({ message: TURNSTILE_FAILURE_MESSAGE })
+    }
+
+    if (!GH_ACCESS_TOKEN || !GH_ORG || !GH_APP_REPO) {
+      throw new Error('Env misconfigured')
+    }
+    console.log(`REPO: ${GH_ORG}/${GH_APP_REPO}`)
+
+    const byOrFor = req.body.LTS ? 'for' : 'by'
+    const issueTitle = `${req.body.RED ? 'RED: ' : ''}${
+      req.body.project_name
+    } ${byOrFor} ${req.body.your_name}`
+
+    const contactFooter = `
+---
+
+${req.body.website ? `Website: ${req.body.website}` : ''}
+${req.body.license ? `License: ${req.body.license}` : ''}
+${req.body.github ? `GitHub: ${req.body.github}` : ''}
+${
+  req.body.personal_github ? `Personal GitHub: ${req.body.personal_github}` : ''
+}
+${npub ? `npub: ${npub}` : ''}
+${
+  req.body.other_contact
+    ? `Other contact details: ${req.body.other_contact}`
+    : ''
+}
+${
+  req.body.work_countries
+    ? `Country or countries of work: ${req.body.work_countries}`
+    : ''
+}
+${req.body.other_lead ? `Project lead: ${req.body.other_lead}` : ''}
+`
+
+    // Condensed information for screening purposes, no PII
+    const issueBody = req.body.RED
+      ? `
+### Research
+
+${req.body.short_description}
+
+### Prior Work
+
+${req.body.prior_work || 'n/a'}
+
+### Budget
+
+**Spend so far:**
+${req.body.token_spend_so_far || 'n/a'}
+
+**Expected ongoing burn:**
+${req.body.estimated_token_burn || 'n/a'}
+
+**Duration:** ${req.body.duration || 'n/a'}
+
+### Acknowledgments
+
+**Terms effective:** ${req.body.red_terms_effective || 'n/a'}
+
+- Not authorization: ${req.body.red_ack_not_authorization ? 'Yes' : 'No'}
+- Sanctions / export-control: ${req.body.red_ack_sanctions ? 'Yes' : 'No'}
+- Authorized LLM/compute accounts: ${
+          req.body.red_ack_llm_accounts ? 'Yes' : 'No'
+        }
+- Accurate info / responsible disclosure: ${
+          req.body.red_ack_accurate_responsible ? 'Yes' : 'No'
+        }
+- Terms & privacy: ${req.body.red_ack_terms ? 'Yes' : 'No'}
+${contactFooter}`
+      : `
+### Description
+
+${req.body.short_description}
+
+### Potential Impact
+
+${req.body.potential_impact}
+
+### Timeline & Milestones
+
+${req.body.duration ? `Grant duration: ${req.body.duration}` : ''}
+${req.body.commitment ? `Time commitment: ${req.body.commitment}` : ''}
+
+${req.body.timelines || ''}
+
+### Proposed Budget
+
+${req.body.proposed_budget}
+
+**AI / compute cost:**
+${req.body.ai_cost || 'n/a'}
+
+**Grand total:** ${formatUsdDisplay(req.body.grand_total) || 'n/a'}
+
+**Prior funding:** ${req.body.has_received_funding === 'yes' ? 'Yes' : 'No'}
+
+${req.body.what_funding ? req.body.what_funding : ''}
+
+**Additional funding sources:** ${
+          req.body.has_additional_funding === 'yes' ? 'Yes' : 'No'
+        }
+
+${req.body.additional_funding ? req.body.additional_funding : ''}
+
+### References & Prior Contributions
+
+${req.body.references || ''}
+
+${req.body.bios ? req.body.bios : 'No prior contributions.'}
+
+**Years of dev experience:**
+${req.body.years_experience ? `${req.body.years_experience}` : 'n/a'}
+
+### Project Media
+
+${req.body.screenshots_videos ? req.body.screenshots_videos : 'None provided.'}
+
+### Video Application
+
+${req.body.video_application ? req.body.video_application : 'None provided.'}
+
+### Anything Else
+
+${req.body.anything_else ? req.body.anything_else : 'No.'}
+
+### Acknowledgment
+
+**Sanctions / export-control:** ${
+          req.body.ack_sanctions === true ? 'Yes' : 'No'
+        }
+${contactFooter}`
+
+    // Labels and repo are set according to main focus.
+    const mainFocus = normalizeMainFocus(req.body.main_focus)
+    const issueLabels = getApplicationIssueLabels(req.body)
+    const appRepo = getApplicationRepo(GH_APP_REPO, mainFocus, req.body.RED)
+
+    try {
+      await octokit.rest.issues.create({
+        owner: GH_ORG,
+        repo: appRepo,
+        title: issueTitle,
+        body: issueBody,
+        labels: issueLabels,
+      })
+
+      // Best-effort: GitHub record is the source of truth; email failure must
+      // not block a successful submit (avoids a second Turnstile mid-flight).
+      try {
+        await sendApplicationEmails(req.body)
+      } catch (emailErr) {
+        console.error('Application emails failed after issue create:', emailErr)
+      }
+
+      res.status(200).json({ message: 'success' })
+    } catch (err) {
+      res.status(500).json({ statusCode: 500, message: (err as Error).message })
+    }
+  } else {
+    res.setHeader('Allow', 'POST')
+    res.status(405).end('Method Not Allowed')
+  }
+}

@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.task-list-item::before {
+  @apply hidden;
+}
+
+.task-list-item {
+  @apply list-none;
+}
+
+.footnotes {
+  @apply mt-12 border-t border-gray-200 pt-8 dark:border-gray-700;
+}
+
+.data-footnote-backref {
+  @apply no-underline;
+}
+
+.csl-entry {
+  @apply my-5;
+}
+
+/* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+@layer base {
+  h1 {
+    @apply text-2xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+}
+
+button.small {
+  @apply border border-black bg-white p-1 text-sm text-black;
+}
+
+button.group {
+  @apply border border-black bg-white p-2 text-sm text-black;
+}
+
+button.pay {
+  @apply flex min-w-[20rem] flex-1 justify-start gap-4 rounded-xl border-2 border-black bg-white p-8 text-xl text-black;
+}
+
+button.pay:disabled {
+  @apply border-gray-400 bg-gray-100 text-gray-400 hover:shadow-none;
+}
+
+button,
+button[type='submit'] {
+  @apply rounded px-4 py-2 text-white;
+}
+
+button.secondary {
+  @apply border bg-white text-black;
+}
+
+.prose > ul > li > p {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.disabled {
+  pointer-events: none;
+  cursor: default;
+  opacity: 0.6;
+}
+
+.prose a[data-external]:not([class]) {
+  color: inherit !important;
+  text-decoration: underline dotted;
+  text-decoration-color: rgb(192 192 192);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease,
+    text-decoration-style 0.15s ease;
+}
+
+.prose a[data-external]:not([class]):hover {
+  color: var(--tw-prose-links);
+  text-decoration-style: solid;
+  text-decoration-color: var(--tw-prose-links);
+}
+
+:is(.dark .prose) a[data-external]:not([class]) {
+  text-decoration-color: rgb(100 100 100);
+}
+
+.prose .nostr-links a:not([data-external]) {
+  color: rgb(168 85 247) !important;
+}
+
+.prose .nostr-links a:not([data-external]):hover {
+  color: rgb(147 51 234) !important;
+}
